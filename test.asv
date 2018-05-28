@@ -1,0 +1,10 @@
+% visualize raw input data
+ptCloud = pcread('100000.pcd');
+ptCloud.Color 
+pcshow(ptCloud, 'MarkerSize', 200);
+
+Mdl = createns(ptCloud.Location, 'Distance', 'euclidean');
+result = rangesearch(Mdl, ptCloud.Location(1, :), 1.0);
+ptCloud.Color(result, :) = [0, 255, 0];
+
+ClusterIndices = RBNN(Points, 1.0, 5);
