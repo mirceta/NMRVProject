@@ -33,6 +33,7 @@ for frame = 1:1:99
     dronePts = ptCloud.Location(Cluster{1}, :);
     droneCentroid = mean(dronePts);
     droneBoundingBox = max(dronePts) - min(dronePts) + [1, 1, 1];
+    field = points_to_gaussian_field(dronePts, droneCentroid - droneBoundingBox / 2, droneBoundingBox, 30, 0.005);
     
     hold off;
     pcshow(ptCloud, 'MarkerSize', 30);
