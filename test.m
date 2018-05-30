@@ -1,5 +1,5 @@
 % visualize raw input data
-ptCloud = pcread('100000.pcd');
+ptCloud = pcread('nmrvscans/Scan500000.pcd');
 
 ClusterIndices = RBNN(ptCloud.Location, 1.0, 5);
 
