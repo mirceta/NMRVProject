@@ -16,8 +16,11 @@ droneCentroid = mean(dronePts);
 % compute the bounding box
 droneBoundingBox = max(dronePts) - min(dronePts) + [1, 1, 1];
 
+% get current distance from sensor
+sigma = norm(droneCentroid) * 0.001;
+
 % compute the template
-template = points_to_gaussian_field(dronePts, droneCentroid - droneBoundingBox / 2, droneBoundingBox, 30, 0.005);
+template = points_to_gaussian_field(dronePts, droneCentroid - droneBoundingBox / 2, droneBoundingBox, 30, sigma);
 
 
 PlotSegmentation(ptCloud, ClusterIndices);
@@ -40,7 +43,8 @@ for frame = 1:1:99
     
     % get the search region as feature
     WindowStart = droneCentroid - WindowSize / 2;
-    window = points_to_gaussian_field(dronePts, WindowStart, WindowSize, 30, 0.005);
+    sigma = norm(droneCentroid) * 0.001;
+    window = points_to_gaussian_field(dronePts, WindowStart, WindowSize, 30, sigma);
     
     % compute the cross correlation
     [ssd, ncc] = template_matching(template, window);
