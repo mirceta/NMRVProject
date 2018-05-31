@@ -51,6 +51,9 @@ for frame = 1:1:99
     [v,loc] = max(ncc(:));
     [ii,jj,k] = ind2sub(size(ncc),loc);
     
+    % new template is the found hit
+    template = getpatch3D(window, size(template), [ii, jj, k]);
+    
     % compute the centroid and new bounding box
     droneCentroid = WindowStart + ([ii, jj, k] ./ size(window)) .* WindowSize;
         % bounding box stays the same

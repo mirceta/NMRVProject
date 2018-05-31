@@ -33,9 +33,9 @@ for frame = 1:1:99
     dronePts = ptCloud.Location(Cluster{1}, :);
     droneCentroid = mean(dronePts);
     droneBoundingBox = max(dronePts) - min(dronePts) + [1, 1, 1];
-    
-    hold off;
-    pcshow(ptCloud, 'MarkerSize', 30);
+   
     hold on;
+    pcshow(ptCloud, 'MarkerSize', 30); 
     plotcube(droneBoundingBox, droneCentroid - droneBoundingBox/2, .3, [1 0 1]);
+    hold off;
 end
