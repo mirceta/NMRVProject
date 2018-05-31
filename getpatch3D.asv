@@ -11,14 +11,6 @@ function patch = getpatch3D(window, templateSize, center)
     zr = max(1, min(size(window, 1), center(3) + templateSize(3)));
     patch = window(xl:xr, yl:yr, zl:zr);
     
-    % fix the padding
-    if size(patch) ~= templateSize
-        A = zeros(templateSize);
-        xr = min(size(A, 1), templateSize(1));
-        yr = min(size(A, 2), templateSize(2));
-        zr = min(size(A, 3), templateSize(3));
-        A(1:xr,1:yr,1:zr) = patch;
-        patch = A;
-    end
+    if size()
 end
 
