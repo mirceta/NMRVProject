@@ -45,6 +45,8 @@ for frame = 1:1:99
     WindowStart = droneCentroid - WindowSize / 2;
     sigma = norm(droneCentroid) * 0.001;
     window = points_to_gaussian_field(dronePts, WindowStart, WindowSize, 30, sigma);
+    dim = size(window, 1);
+    window = window .* hamming_3d(dim, dim, dim);
     
     % compute the cross correlation
     [ssd, ncc] = template_matching(template, window);
@@ -62,4 +64,8 @@ for frame = 1:1:99
     pcshow(ptCloud, 'MarkerSize', 30);
     plotcube(droneBoundingBox, droneCentroid - droneBoundingBox/2, .3, [1 0 1]);
     hold off;
+    
+    if frame == 47
+        window;
+    end
 end
