@@ -1,7 +1,10 @@
-% 7 seconds for 1000 voxels
-for i = 1:1000
-    plotcube([3,3,3], [3,3,3], .3, [1 0 1]);
-    if mod(i,10000) == 0
-        i
-    end
-end
+% verify whether cross correlation works.
+
+window = ones(100, 100, 100);
+[x, y, z] = size(field);
+window(20:20+x-1, 20:20+y-1, 20:20+z-1) = field;
+
+[ssd, ncc] = template_matching(field, window);
+
+[v,loc] = max(ncc(:));
+[ii,jj,k] = ind2sub(size(ncc),loc);
