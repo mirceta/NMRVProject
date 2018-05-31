@@ -16,26 +16,43 @@ droneCentroid = mean(dronePts);
 % compute the bounding box
 droneBoundingBox = max(dronePts) - min(dronePts) + [1, 1, 1];
 
+% compute the template
+template = points_to_gaussian_field(dronePts, droneCentroid - droneBoundingBox / 2, droneBoundingBox, 30, 0.005);
+
+
 PlotSegmentation(ptCloud, ClusterIndices);
 hold on;
 plotcube(droneBoundingBox, droneCentroid - droneBoundingBox/2, .3, [1 0 1]);
 
 %%%%%%%%%%%%%%%
 % mean shift on next frames
-SearchSphereRadius = max(droneBoundingBox) / 2;
+WindowSize = max(droneBoundingBox) * 1.2;
+SearchSphereRadius = WindowSize / 2;
+WindowSize = [WindowSize, WindowSize, WindowSize];
 for frame = 1:1:99
+    hold off;
     ptCloud = pcread(join([datafolder, string(frame), datasuffix], ''));
     
+    % get the window with the points
     KdTree = createns(ptCloud.Location, 'Distance', 'euclidean');
     Cluster = rangesearch(KdTree, droneCentroid, SearchSphereRadius);
-    
-    % compute centroid + bounding box
     dronePts = ptCloud.Location(Cluster{1}, :);
-    droneCentroid = mean(dronePts);
-    droneBoundingBox = max(dronePts) - min(dronePts) + [1, 1, 1];
     
-    hold off;
-    pcshow(ptCloud, 'MarkerSize', 30);
+    % get the search region as feature
+    WindowStart = droneCentroid - WindowSize / 2;
+    window = points_to_gaussian_field(dronePts, WindowStart, WindowSize, 30, 0.005);
+    
+    % compute the cross correlation
+    [ssd, ncc] = template_matching(template, window);
+    [v,loc] = max(ncc(:));
+    [ii,jj,k] = ind2sub(size(ncc),loc);
+    
+    % compute the centroid and new bounding box
+    droneCentroid = WindowStart + ([ii, jj, k] ./ size(window)) .* WindowSize;
+        % bounding box stays the same
+    
     hold on;
+    pcshow(ptCloud, 'MarkerSize', 30);
     plotcube(droneBoundingBox, droneCentroid - droneBoundingBox/2, .3, [1 0 1]);
+    hold off;
 end

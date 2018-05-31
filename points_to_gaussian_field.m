@@ -23,6 +23,6 @@ function field = points_to_gaussian_field(points, boundingBoxOrigin, boundingBox
     end
     field = gauss3filter(field, sigma); % smooth by gaussian
     
-    % plot_descriptor(points, field);
+    %plot_descriptor(points, field);
 end
 
