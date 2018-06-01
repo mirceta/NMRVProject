@@ -1,0 +1,91 @@
+% setup (the relevant variables)
+alpha = 0.5;
+beta = 0.5;
+gamma = 0.5;
+w = 5;
+h = 5;
+r = 50.0;
+q = 50.0;
+[A, C, Q, R, V] = get_kalmanParams(alpha, beta, gamma, w ,h, r, q)
+
+% We set up the scene and find the initial drone position
+datafolder = 'nmrvscans/Scan';
+datasuffix = '00000.pcd';
+ptCloud = pcread(join([datafolder, '0', datasuffix]));
+
+ClusterIndices = RBNN(ptCloud.Location, 1.0, 5);
+centroid = [17 0 2];
+cid = simple_detector(ptCloud.Location, ClusterIndices, centroid);
+
+% find the centroid of the drone
+dronePts = ptCloud.Location(ClusterIndices == cid, :);
+droneCentroid = mean(dronePts);
+
+% compute the bounding box
+droneBoundingBox = max(dronePts) - min(dronePts) + [1, 1, 1];
+
+% get current distance from sensor
+sigma = norm(droneCentroid) * 0.001;
+
+% compute the template
+template = points_to_gaussian_field(dronePts, droneCentroid - droneBoundingBox / 2, droneBoundingBox, 30, sigma);
+
+
+PlotSegmentation(ptCloud, ClusterIndices);
+hold on;
+plotcube(droneBoundingBox, droneCentroid - droneBoundingBox/2, .3, [1 0 1]);
+% for each frame:
+    % extract the pdf from the correlation prediction
+    % make it the new observation
+    % run the kalman update function -> the output is the new centroid
+
+
+
+rq = [100.0 1.0;
+     5.0 1.0;
+     1.0 1.0;
+     1.0 5.0;
+     1.0 100.0];
+N = 25;
+% rectangle
+x = [linspace(0, 1, N), ones(1, N), linspace(1, 0, N), zeros(1, N)];
+y = [ones(1, N), linspace(1, 0, N), zeros(1, N), linspace(0, 1, N)];
+
+[A, C, Q, R, sx1, V] = get_kalmanParams(x(1), y(1), 1.0, 1.0, 0.5, 0.5, 200, 400, r, q);
+        
+
+
+% test script
+sx = zeros(max(size(sx1)), N);
+sx(:, 1) = sx1;
+
+state = sx(:, 1);
+covariance = V;
+
+for i=2:length(x)
+    [state, covariance] = kalman_update(A, C, Q, R, [x(i), y(i)],...
+                            state, covariance);
+    sx(:, i) = state;
+end
+
+if strcmp(mode(modeidx), "nca")
+    xp = sx(1,:);
+    yp = sx(4,:);
+end
+if strcmp(mode(modeidx), "ncv")
+    xp = sx(1,:);
+    yp = sx(3,:);
+end
+if strcmp(mode(modeidx), "rw")
+    xp = sx(1,:);
+    yp = sx(2,:);
+end
+
+
+subplot(3, 5, (modeidx - 1) * 5 + rqidx);
+plot(x, y, "ro");
+hold on;
+plot(xp, yp, 'bo');
+text(12, 15, sprintf('%s; r: %d, q: %d', mode{modeidx}, r, q), 'Color','w', ...
+'FontSize',10, 'FontWeight','normal', ...
+'BackgroundColor','k', 'Margin',1);
