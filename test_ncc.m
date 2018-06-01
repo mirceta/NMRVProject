@@ -69,7 +69,7 @@ for frame = 41:1:99
     [sx, sy, sz] = size(template_new);
     g = gaussPeak3D(sx, sy, sz,  round(sx / 2), round(sy / 2), round(sz / 2), 0.5);
     
-    template_new = flipdim(flipdim(flipdim(template_new,1),2),3); % flip dimension in 3D
+    %template_new = flipdim(flipdim(flipdim(template_new,1),2),3); % flip dimension in 3D
     gF = fftn(g, size(template_new));
     templateF = fftn(template_new, size(template_new));
     templateF = (gF .* conj(templateF)) ./ (templateF .* conj(templateF));
